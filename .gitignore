@@ -11,3 +11,4 @@ db_backup.json
 !*/migrations/__init__.py
 screenshots/
 .env
+files/
