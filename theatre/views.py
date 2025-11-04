@@ -150,8 +150,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 
 
 class OrderPagination(PageNumberPagination):
-    page_size = 10
-    max_page_size = 100
+    page_size = 1
+    max_page_size = 10
 
 
 class ReservationViewSet(
