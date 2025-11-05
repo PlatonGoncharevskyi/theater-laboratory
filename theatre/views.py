@@ -10,9 +10,19 @@ from rest_framework.viewsets import GenericViewSet
 
 from theatre.models import Genre, Actor, TheatreHall, Play, Performance, Reservation
 from theatre.permissions import IsAdminOrIfAuthenticatedReadOnly
-from theatre.serializers import GenreSerializer, ActorSerializer, TheatreHallSerializer, PlaySerializer, \
-    PlayDetailSerializer, PlayListSerializer, PerformanceSerializer, PerformanceListSerializer, \
-    PerformanceDetailSerializer, ReservationSerializer, ReservationListSerializer
+from theatre.serializers import (
+    GenreSerializer,
+    ActorSerializer,
+    TheatreHallSerializer,
+    PlaySerializer,
+    PlayDetailSerializer,
+    PlayListSerializer,
+    PerformanceSerializer,
+    PerformanceListSerializer,
+    PerformanceDetailSerializer,
+    ReservationSerializer,
+    ReservationListSerializer,
+)
 
 
 class GenreViewSet(
@@ -49,7 +59,7 @@ class PlayViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet,
 ):
     queryset = Play.objects.prefetch_related("genres", "actors")
     serializer_class = PlaySerializer
@@ -113,14 +123,16 @@ class PlayViewSet(
 
 
 class PerformanceViewSet(viewsets.ModelViewSet):
-    queryset = (Performance.objects.all()
-                .select_related("play", "theatre_hall")
-                .annotate(
-                    tickets_available=(
-                        F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
-                        - Count("tickets")
-                    )
-    ))
+    queryset = (
+        Performance.objects.all()
+        .select_related("play", "theatre_hall")
+        .annotate(
+            tickets_available=(
+                F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
+                - Count("tickets")
+            )
+        )
+    )
     serializer_class = PerformanceSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
@@ -138,7 +150,6 @@ class PerformanceViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(movie_id=int(play_id_str))
 
         return queryset
-
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -159,8 +170,9 @@ class ReservationViewSet(
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
-    queryset = Reservation.objects.prefetch_related("tickets__performance__play",
-                                                    "tickets__performance__theatre_hall")
+    queryset = Reservation.objects.prefetch_related(
+        "tickets__performance__play", "tickets__performance__theatre_hall"
+    )
     serializer_class = ReservationSerializer
     pagination_class = OrderPagination
     permission_classes = (IsAuthenticated,)
@@ -176,5 +188,3 @@ class ReservationViewSet(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-
