@@ -4,8 +4,10 @@ from django.db.models import F, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from theatre.models import Genre, Actor, TheatreHall, Play, Performance, Reservation
@@ -188,3 +190,9 @@ class ReservationViewSet(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=["GET"])
+    def summary(self, request):
+        reservations = self.get_queryset()
+        total_tickets = sum(res.tickets.count() for res in reservations)
+        return Response({"total_tickets": total_tickets})
